@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Button, Typography } from '@material-ui/core';
 import Web3 from 'web3';
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import './index.css'
 
 
 function Block() {
@@ -206,9 +207,7 @@ function Block() {
   return (
     <Container maxWidth="md" className={style.container}>
       <Typography variant="h4">Dashboard</Typography>
-      <Button onClick={handleLogout} color="secondary" variant="contained" style={{ marginBottom: 20 }}>
-        Logout
-      </Button>
+      
       <Add
         patientBio={patientBio}
         setPatientBio={(obj) => setPatientBio(obj)}
@@ -217,7 +216,16 @@ function Block() {
         setPatientMedicalData={(obj) => setPatientMedicalData(obj)}
         addUpdatePatientMedicalData={addUpdatePatientMedicalData}
       />
-      <ShowData patientBioMedList={patientBioMedList} />
+      <Button 
+        onClick={() => navigate('/patient-data')} 
+        variant="contained" 
+        color="primary"
+      >
+        View All Records
+      </Button>
+      <Button onClick={handleLogout} color="secondary" variant="contained" style={{ marginBottom: 20, width: 200 }} >
+        Logout
+      </Button>
     </Container>
   )
 }

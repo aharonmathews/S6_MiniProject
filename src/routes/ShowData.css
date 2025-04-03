@@ -1,0 +1,91 @@
+/* General Styling */
+.show-data-container {
+    padding: 20px;
+    text-align: center;
+    font-family: "Poppins", sans-serif;
+    background: #f4f4f4;
+  }
+  
+  /* Table Title */
+  .table-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 20px;
+  }
+  
+  /* Table Wrapper */
+  .table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+    margin: auto;
+  }
+  
+  /* Styled Table */
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  /* Table Headers */
+  .styled-table thead {
+    background-color: #0077b6;
+  }
+  
+  .styled-table th {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 15px;
+    text-align: left;
+  }
+  
+  /* Table Rows */
+  .styled-table tbody tr:nth-child(even) {
+    background-color: #f1f9ff;
+  }
+  
+  .styled-table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+  }
+  
+  .styled-table tbody tr:hover {
+    background-color: #cce7ff;
+    transition: 0.3s ease-in-out;
+  }
+  
+  /* Table Cells */
+  .styled-table td {
+    font-size: 14px;
+    color: #333;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* No Data Row */
+  .no-data {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #777;
+    padding: 15px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .table-title {
+      font-size: 22px;
+    }
+  
+    .styled-table th,
+    .styled-table td {
+      font-size: 13px;
+      padding: 10px;
+    }
+  }
+  

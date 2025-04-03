@@ -21,6 +21,8 @@ import Login from "./routes/login";
 import Register from "./routes/register";
 import Block from "./block";
 
+import './index.css'
+
 const App = () => {
   return (
     <Router>
@@ -28,6 +30,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/block" element={<Block />} />
+        <Route path="/patient-data" element={<ShowData />} />
       </Routes>
     </Router>
   );
