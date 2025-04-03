@@ -1,169 +1,157 @@
+import React from 'react';
 import {
-  Box,
-  Button,
   Card,
-  Container,
-  Grid,
-  InputAdornment,
   TextField,
-} from '@material-ui/core'
-import { KeyboardDatePicker } from '@material-ui/pickers'
-import React, { useState } from 'react'
-import style from './AddData.module.css'
+  InputAdornment,
+  Button,
+  Typography,
+} from '@material-ui/core';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import HealingIcon from '@material-ui/icons/Healing';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import AccessibilityIcon from '@material-ui/icons/Accessibility';
+import HeightIcon from '@material-ui/icons/Height';
+import EventIcon from '@material-ui/icons/Event';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import SaveIcon from '@material-ui/icons/Save';
 
-export default function AddMedicalData(props) {
-  const {
-    patientMedicalData,
-    setPatientMedicalData,
-    addUpdatePatientMedicalData,
-    handleBack,
-  } = props
-
-  const handleChange = (e) => {
+export default function AddMedicalData({
+  patientMedicalData,
+  setPatientMedicalData,
+  addUpdatePatientMedicalData,
+  handleBack,
+}) {
+  const handleSave = () => {
     if (
-      patientMedicalData.weight === '' ||
-      patientMedicalData.height === '' ||
-      patientMedicalData.bloodGroup === '' ||
-      patientMedicalData.diseaseName === '' ||
-      patientMedicalData.diseaseDescription === '' ||
-      patientMedicalData.diseaseStartedOn === ''
+      !patientMedicalData.weight ||
+      !patientMedicalData.height ||
+      !patientMedicalData.bloodGroup ||
+      !patientMedicalData.diseaseName ||
+      !patientMedicalData.diseaseDescription ||
+      !patientMedicalData.diseaseStartedOn
     ) {
-      alert('all fields are required')
-      return
+      alert('All fields are required');
+      return;
     }
-    if (window.confirm('Are you sure that you want to save this data')) {
-      addUpdatePatientMedicalData()
+    if (window.confirm('Are you sure you want to save this data?')) {
+      addUpdatePatientMedicalData();
     }
-  }
+  };
 
-  const as = (e) => {
-    console.log(e._d.toDateString())
-    if (e && e._d)
-      setPatientMedicalData({
-        ...patientMedicalData,
-        diseaseStartedOn: e._d.toDateString(),
-      })
-  }
   return (
-    <div className={style.cardContainer}>
-      <Card className={style.card} elevation={0}>
-        <h2 className={style.h2}>Patient Medical Data</h2>
-        <form className={style.form} noValidate autoComplete="off">
+    <div className="cardContainer fadeIn">
+      <Card className="card" elevation={0}>
+        <h2 className="h2">Patient Medical Data</h2>
+        <Typography variant="body2" style={{ marginBottom: '1.5rem', color: '#757575' }}>
+          Provide the patient's medical details accurately.
+        </Typography>
+        
+        <form className="form" noValidate autoComplete="off">
           <TextField
-            id="outlined-basic"
             label="Medical Report ID"
             variant="outlined"
-            value={patientMedicalData.medReportId}
-            onChange={(e) =>
-              setPatientMedicalData({
-                ...patientMedicalData,
-                medReportId: e.target.value,
-              })
-            }
+            value={patientMedicalData.medReportId || ''}
+            onChange={(e) => setPatientMedicalData({ ...patientMedicalData, medReportId: e.target.value })}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LocalHospitalIcon style={{ color: '#3f51b5' }} />
+                </InputAdornment>
+              ),
+            }}
           />
-          <div  className={style.textFieldGroup}>
+          
+          <div className="textFieldGroup">
             <TextField
-              id="outlined-basic"
               label="Weight"
               variant="outlined"
-              value={patientMedicalData.weight}
+              value={patientMedicalData.weight || ''}
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">KG</InputAdornment>
+                endAdornment: <InputAdornment position="end">KG</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccessibilityIcon style={{ color: '#3f51b5' }} />
+                  </InputAdornment>
                 ),
               }}
-              onChange={(e) =>
-                setPatientMedicalData({
-                  ...patientMedicalData,
-                  weight: e.target.value,
-                })
-              }
+              onChange={(e) => setPatientMedicalData({ ...patientMedicalData, weight: e.target.value })}
             />
             <TextField
-              id="outlined-basic"
               label="Height"
               variant="outlined"
-              value={patientMedicalData.height}
+              value={patientMedicalData.height || ''}
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">cm</InputAdornment>
+                endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <HeightIcon style={{ color: '#3f51b5' }} />
+                  </InputAdornment>
                 ),
               }}
-              onChange={(e) =>
-                setPatientMedicalData({
-                  ...patientMedicalData,
-                  height: e.target.value,
-                })
-              }
+              onChange={(e) => setPatientMedicalData({ ...patientMedicalData, height: e.target.value })}
             />
           </div>
+          
           <TextField
-            id="outlined-basic"
-            label="Disease Name"
-            variant="outlined"
-            value={patientMedicalData.diseaseName}
-            onChange={(e) =>
-              setPatientMedicalData({
-                ...patientMedicalData,
-                diseaseName: e.target.value,
-              })
-            }
-          />
-          <div  className={style.textFieldGroup}>
-          <TextField
-            id="outlined-basic"
             label="Blood Group"
             variant="outlined"
-            value={patientMedicalData.bloodGroup}
-            onChange={(e) =>
-              setPatientMedicalData({
-                ...patientMedicalData,
-                bloodGroup: e.target.value,
-              })
-            }
+            value={patientMedicalData.bloodGroup || ''}
+            onChange={(e) => setPatientMedicalData({ ...patientMedicalData, bloodGroup: e.target.value })}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <HealingIcon style={{ color: '#3f51b5' }} />
+                </InputAdornment>
+              ),
+            }}
           />
+          
+          <TextField
+            label="Disease Name"
+            variant="outlined"
+            value={patientMedicalData.diseaseName || ''}
+            onChange={(e) => setPatientMedicalData({ ...patientMedicalData, diseaseName: e.target.value })}
+          />
+          
+          <TextField
+            label="Disease Description"
+            variant="outlined"
+            multiline
+            rows={3}
+            value={patientMedicalData.diseaseDescription || ''}
+            onChange={(e) => setPatientMedicalData({ ...patientMedicalData, diseaseDescription: e.target.value })}
+          />
+          
           <KeyboardDatePicker
             margin="normal"
-            id="date-picker-dialog"
             label="Disease Started On"
             format="DD/MM/yyyy"
-            className={style.date}
-            value={patientMedicalData.diseaseStartedOn}
-            // variant="inline"
+            value={patientMedicalData.diseaseStartedOn || null}
             inputVariant="outlined"
-            onChange={(e) => as(e)}
+            placeholder="DD/MM/YYYY"
+            onChange={(date) => setPatientMedicalData({ ...patientMedicalData, diseaseStartedOn: date?._d?.toDateString() || '' })}
             KeyboardButtonProps={{
               'aria-label': 'change date',
             }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EventIcon style={{ color: '#3f51b5' }} />
+                </InputAdornment>
+              ),
+            }}
           />
-          </div>
-          <TextField
-            id="outlined-basic"
-            label="Description"
-            variant="outlined"
-            value={patientMedicalData.diseaseDescription}
-            multiline
-            rows={2}
-            onChange={(e) =>
-              setPatientMedicalData({
-                ...patientMedicalData,
-                diseaseDescription: e.target.value,
-              })
-            }
-          />
-          <div className={style.btnGroup}>
-            <Button
-              className={[style.btn, style.btnRed].join(' ')}
-              onClick={handleBack}
-            >
+          
+          <div className="buttonGroup">
+            <Button className="btn" onClick={handleBack} startIcon={<ArrowBackIcon />}>
               Back
             </Button>
-            <Button className={style.btn} onClick={(e) => handleChange()}>
-              Save
+            <Button className="btn" onClick={handleSave} startIcon={<SaveIcon />}>
+              Save Medical Data
             </Button>
           </div>
         </form>
       </Card>
     </div>
-  )
+  );
 }

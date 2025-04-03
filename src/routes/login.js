@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { auth } from "../firebase.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import '../index.css'
+import "./login.css"; // Import the CSS file
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,31 +22,44 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-black ">
-      <div className="w-full max-w-md bg-black p-8 rounded-lg shadow-lg flex flex-col justify-center">
-        <h2 className="text-2xl font-semibold text-center mb-4 text-red-500">Login</h2>
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-3 border rounded"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 border rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit" className="w-full bg-gray-300 text-black py-2 rounded hover:bg-gray-600">
-            Login
-          </button>
-        </form>
+    <div className="login-container">
+      <div className="login-box">
+        <div className="login-content">
+          <h2 className="login-title">Welcome Back</h2>
+          <p className="login-subtitle">Login to access your account</p>
+          {error && <p className="error-message">{error}</p>}
+          <form onSubmit={handleLogin} className="login-form">
+            <input
+              type="email"
+              placeholder="Email"
+              className="login-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              className="login-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button type="submit" className="login-button">
+              Login
+            </button>
+          </form>
+          <p className="register-text">
+            Don't have an account ?{' '}
+            <span onClick={() => navigate("/register")} className="create-account">
+              Create an Account
+            </span>
+          </p>
+          
+        </div>
+        <div className="image-section">
+          <p>Image Placeholder</p>
+        </div>
       </div>
     </div>
   );

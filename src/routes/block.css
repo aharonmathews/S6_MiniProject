@@ -1,0 +1,257 @@
+/* HealthcareApp.css */
+:root {
+  --primary-color: #3f51b5;
+  --primary-light: #6573c3;
+  --primary-dark: #2c387e;
+  --secondary-color: #f50057;
+  --secondary-light: #ff4081;
+  --secondary-dark: #c51162;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --border-color: #e0e0e0;
+  --success-color: #4caf50;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+body {
+  background-color: var(--background-color);
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Dashboard styles */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  color: var(--primary-dark);
+  margin: 0;
+  font-weight: 500;
+}
+
+.dashboard-subtitle {
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Cards Container */
+.cardsContainer {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-light) var(--background-color);
+  margin-bottom: 2rem;
+  border-radius: var(--border-radius) !important;
+  box-shadow: var(--box-shadow) !important;
+  background-color: var(--card-background);
+}
+
+.cardsContainer::-webkit-scrollbar {
+  height: 6px;
+}
+
+.cardsContainer::-webkit-scrollbar-track {
+  background: var(--background-color);
+}
+
+.cardsContainer::-webkit-scrollbar-thumb {
+  background-color: var(--primary-light);
+  border-radius: 6px;
+}
+
+/* Card Container */
+.cardContainer {
+  min-width: 100%;
+  padding: 1.5rem;
+}
+
+.card {
+  background-color: var(--card-background) !important;
+  padding: 1rem !important;
+  border-radius: var(--border-radius) !important;
+  box-shadow: none !important;
+}
+
+/* Form Styles */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.h2 {
+  font-size: 1.75rem;
+  color: var(--primary-dark);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 1.5px;
+}
+
+.textFieldGroup {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.textFieldGroup > div {
+  flex: 1;
+}
+
+.date {
+  width: 100%;
+}
+
+/* Button Styles */
+.btn {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 30px !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.2) !important;
+  transition: var(--transition) !important;
+  align-self: flex-end;
+  margin-top: 1rem !important;
+}
+
+.btn:hover {
+  background-color: var(--primary-dark) !important;
+  box-shadow: 0 6px 14px rgba(63, 81, 181, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.btnRed {
+  background-color: var(--secondary-color) !important;
+  box-shadow: 0 4px 12px rgba(245, 0, 87, 0.2) !important;
+}
+
+.btnRed:hover {
+  background-color: var(--secondary-dark) !important;
+  box-shadow: 0 6px 14px rgba(245, 0, 87, 0.3) !important;
+}
+
+.btnGroup {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+/* Patient Records Table */
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.records-table th {
+  background-color: var(--primary-color);
+  color: white;
+  text-align: left;
+  padding: 1rem;
+}
+
+.records-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.records-table tr:last-child td {
+  border-bottom: none;
+}
+
+.records-table tr:nth-child(even) {
+  background-color: rgba(63, 81, 181, 0.05);
+}
+
+.view-btn {
+  background-color: var(--primary-light) !important;
+  color: white !important;
+  min-width: auto !important;
+  padding: 0.4rem 1rem !important;
+}
+
+/* Medical ID Badge */
+.medical-id {
+  background-color: rgba(63, 81, 181, 0.1);
+  color: var(--primary-dark);
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeIn {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .textFieldGroup {
+    flex-direction: column;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dashboard-actions {
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
