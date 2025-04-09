@@ -1,47 +1,55 @@
 import { useEffect, useState } from "react";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Web3 from "web3";
 import CryptoJS from "crypto-js";
 import sendToServerForSecondEncryption from "../server/sendToServerForSecondEncryption";
-import { SAVE_DATA_LIST_ADDRESS, SAVE_DATA_LIST_ABI } from "../contracts/SaveData";
-import "./ShowData.css"; // Import the new CSS file
+import './ShowData.css'
 
-function ShowData() {
-  const [patientBioMedList, setPatientBioMedList] = useState([]);
+
+const ShowData = () => {
+  const [records, setRecords] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
-      const saveDataContract = new web3.eth.Contract(SAVE_DATA_LIST_ABI, SAVE_DATA_LIST_ADDRESS);
-
-      let patientBioMedList = [];
-      const totalMedicalReports = await saveDataContract.methods.totalMedicalReports().call();
-
-      for (let i = 0; i < totalMedicalReports; ++i) {
-        const {
-          hashOfOriginalDataString,
-          secondTimeEncryptedString,
-          sender,
-          medReportId,
-        } = await saveDataContract.methods.data(i).call();
-
-        let firstCiphertext = sendToServerForSecondEncryption.decryptSecondCipherText(
-          secondTimeEncryptedString,
-          sender,
-          medReportId
-        );
-
-        let originalDataObject = JSON.parse(
-          CryptoJS.AES.decrypt(firstCiphertext, hashOfOriginalDataString).toString(CryptoJS.enc.Utf8)
-        );
-
-        let rowData = { ...originalDataObject.patientBio, ...originalDataObject.patientMedicalData };
-        patientBioMedList.push(rowData);
+    const fetchRecords = async () => {
+      const web3 = new Web3(Web3.givenProvider);
+      const accounts = await web3.eth.requestAccounts();
+      const account = accounts[0];
+    
+      const db = getFirestore();
+      const querySnapshot = await getDocs(collection(db, "patientRecords"));
+    
+      const userRecords = [];
+    
+      for (let doc of querySnapshot.docs) {
+        const data = doc.data();
+        if (data.account !== account) continue;
+    
+        const { cid, medReportId, hash } = data;
+    
+        try {
+          const ipfsResp = await fetch(`http://127.0.0.1:8080/ipfs/${cid}`);
+          const secondCipherText = await ipfsResp.text();
+    
+          const firstCipherText = sendToServerForSecondEncryption.decryptSecondCipherText(
+            secondCipherText,
+            account,
+            medReportId
+          );
+    
+          const decrypted = CryptoJS.AES.decrypt(firstCipherText, hash).toString(CryptoJS.enc.Utf8);
+          const obj = JSON.parse(decrypted);
+    
+          userRecords.push({ ...obj.patientBio, ...obj.patientMedicalData });
+        } catch (err) {
+          console.error(`❌ Failed to decrypt record ${medReportId}:`, err.message);
+        }
       }
-
-      setPatientBioMedList(patientBioMedList);
+    
+      setRecords(userRecords);
     };
+    
 
-    fetchData();
+    fetchRecords();
   }, []);
 
   return (
@@ -64,12 +72,12 @@ function ShowData() {
             </tr>
           </thead>
           <tbody>
-            {patientBioMedList.length === 0 ? (
+            {records.length === 0 ? (
               <tr>
                 <td colSpan="10" className="no-data">No records found</td>
               </tr>
             ) : (
-              patientBioMedList.map((patient, index) => (
+              records.map((patient, index) => (
                 <tr key={index}>
                   <td>{patient.name}</td>
                   <td>{patient.birthDate}</td>
