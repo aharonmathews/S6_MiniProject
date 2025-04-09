@@ -52,7 +52,7 @@ function Block() {
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate('/login'); // Redirect to login page if not authenticated
+        navigate('/'); // Redirect to login page if not authenticated
       }
     });
   }, [auth, navigate]);
