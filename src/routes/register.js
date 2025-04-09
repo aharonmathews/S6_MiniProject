@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import "./register.css"; // Import the CSS file
+import "./register.css";
+import registerimage from "../assets/login.jpg";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -11,21 +13,52 @@ const Register = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Connect to MetaMask and get wallet address
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      return accounts[0];
+    } else {
+      throw new Error("MetaMask not detected. Please install MetaMask.");
+    }
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const walletAddress = await connectWallet();
+
+      // Check if this wallet is already registered
+      const walletRef = doc(db, "wallets", walletAddress);
+      const walletSnap = await getDoc(walletRef);
+
+      if (walletSnap.exists()) {
+        setError("This wallet address is already linked to another account. Try logging in.");
+        return;
+      }
+
+      // Register with Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Save wallet info to Firestore
+      await setDoc(walletRef, {
+        uid: userCredential.user.uid,
+        email: email,
+        createdAt: new Date(),
+      });
+
       alert("Registration successful!");
-      navigate("/login"); // Redirect to login page after registration
+      navigate("/");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Registration failed.");
     }
   };
 
@@ -66,14 +99,14 @@ const Register = () => {
             </button>
           </form>
           <p className="login-text">
-            Already have an account ?{' '}
+            Already have an account?{" "}
             <span onClick={() => navigate("/")} className="login-account">
-              Create an Account
+              Log in
             </span>
           </p>
         </div>
         <div className="image-section">
-          <p>Image Placeholder</p>
+        <img src={registerimage} className="register-image"></img>
         </div>
       </div>
     </div>

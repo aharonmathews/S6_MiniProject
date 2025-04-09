@@ -245,7 +245,7 @@ function Block() {
                     <td>{record.diseaseName}</td>
                     <td>{record.bloodGroup}</td>
                     <td>
-                      <Button 
+                      <Button onClick={() => navigate('/patient-data')}
                         className="view-btn"
                         size="small"
                         startIcon={<VisibilityIcon style={{fontSize: '1rem'}} />}

@@ -3,6 +3,7 @@ import { auth } from "../firebase.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import "./login.css"; // Import the CSS file
+import loginimage from "../assets/login.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -58,7 +59,7 @@ const Login = () => {
           
         </div>
         <div className="image-section">
-          <p>Image Placeholder</p>
+          <img src={loginimage} className="login-image"></img>
         </div>
       </div>
     </div>
