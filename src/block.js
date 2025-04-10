@@ -20,6 +20,15 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import Web3 from 'web3';
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
+import { create } from 'ipfs-http-client';
+import ipfsService from './ipfs'; // adjust the path if needed
+
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from './firebase';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { fetchAndDecryptPatientData } from './utils/decryptPatientData';
+
+
 function Block() {
   const [web3, setweb3] = useState()
   const [account, setAccount] = useState('')
@@ -89,30 +98,11 @@ function Block() {
   }, []);
 
   const decryptEncryptedList = async (saveDataContract) => {
-    try {
-      let patientBioMedList = []
+    const decryptedData = await fetchAndDecryptPatientData(saveDataContract);
+    setPatientBioMedList(decryptedData);
+  };
 
-      const totalMedicalReports = await saveDataContract.methods.totalMedicalReports().call()
-      for(let i = 0; i < totalMedicalReports; ++i) {
-        const {
-          hashOfOriginalDataString,
-          secondTimeEncryptedString,
-          sender,
-          medReportId
-        } = await saveDataContract.methods.data(i).call()
-        let firstCiphertext = sendToServerForSecondEncryption
-                .decryptSecondCipherText(secondTimeEncryptedString, sender, medReportId)
-        let originalDataObject = JSON.parse(CryptoJS.AES.decrypt(firstCiphertext, hashOfOriginalDataString).toString(CryptoJS.enc.Utf8));
-        let rowData = {...originalDataObject.patientBio, ...originalDataObject.patientMedicalData}
-        patientBioMedList.push(rowData)
-      }
-      setPatientBioMedList(patientBioMedList)
-    } catch (error) {
-      console.error("Error decrypting data:", error);
-    }
-  }
-
-  const addUpdatePatientMedicalData = () => {
+  const addUpdatePatientMedicalData = async () => {
     if (
       !patientBio.name ||
       !patientBio.phoneNumber ||
@@ -125,32 +115,60 @@ function Block() {
       alert('All fields are required. Please complete the form.');
       return;
     }
-    
-    setLoading(true);
-    
-    let JSONStringData = JSON.stringify({patientBio, patientMedicalData})
-    let hash = CryptoJS.SHA256(JSONStringData).toString(CryptoJS.enc.Hex)
-    let firstCiphertext = CryptoJS.AES.encrypt(JSONStringData, hash).toString();
-    let secondCiphertext = sendToServerForSecondEncryption.encryptFirstCipherText(firstCiphertext, account, patientMedicalData.medReportId)
-    
-    saveDataContract.methods
-      .saveData(secondCiphertext, hash, patientMedicalData.medReportId).send({ from: account})
-      .once('receipt', receipt => {
-        console.log('saved', receipt)
-        setPatientMedicalData({
-          ...patientMedicalData, 
-          medReportId: 'MEDREP' + Math.ceil(Math.random() * 1000000000)
-        });
-        decryptEncryptedList(saveDataContract);
-        setLoading(false);
-        alert('Medical record saved successfully!');
-      })
-      .on('error', (error) => {
-        console.error("Transaction error:", error);
-        setLoading(false);
-        alert('Transaction failed. Please try again.');
+  
+    try {
+      setLoading(true);
+  
+      // Step 1: Prepare data
+      const JSONStringData = JSON.stringify({ patientBio, patientMedicalData });
+  
+      // Step 2: Generate hash as the AES key (key1secret)
+      const hash = CryptoJS.SHA256(JSONStringData).toString(CryptoJS.enc.Hex);
+  
+      // Step 3: First-level AES encryption
+      const firstCiphertext = CryptoJS.AES.encrypt(JSONStringData, hash).toString();
+  
+      // Step 4: Send first ciphertext to server for second-level encryption
+      const secondCiphertext = await sendToServerForSecondEncryption.encryptFirstCipherText(
+        firstCiphertext,
+        account,
+        patientMedicalData.medReportId
+      );
+  
+      // Step 5: Upload secondCiphertext to IPFS
+      const ipfsHash = await ipfsService.uploadFile(secondCiphertext);
+  
+      // Step 6: Save hashes to Firestore
+      await addDoc(collection(db, "patientMedicalDataHashes"), {
+        ipfsHash,
+        hash,
+        medReportId: patientMedicalData.medReportId,
+        timestamp: new Date().toISOString()
       });
-  }
+  
+      // Step 7: Save hash to blockchain contract
+      await saveDataContract.methods
+        .saveData(ipfsHash, hash, patientMedicalData.medReportId)
+        .send({ from: account })
+        .once('receipt', (receipt) => {
+          console.log('Saved to contract:', receipt);
+  
+          setPatientMedicalData({
+            ...patientMedicalData,
+            medReportId: 'MEDREP' + Math.ceil(Math.random() * 1000000000)
+          });
+  
+          setLoading(false);
+          alert('Medical record saved successfully!');
+        });
+  
+    } catch (error) {
+      console.error('Error saving medical record:', error);
+      setLoading(false);
+      alert('Something went wrong while saving the data.');
+    }
+  };
+  
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -210,6 +228,13 @@ function Block() {
       
       {renderWalletInfo()}
       
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+          <CircularProgress color="primary" />
+        </div>
+      )}
+
+
       <Add
         patientBio={patientBio}
         setPatientBio={(obj) => setPatientBio(obj)}
@@ -225,38 +250,37 @@ function Block() {
             Recent Medical Records
           </Typography>
           <div style={{overflowX: 'auto'}}>
-            <table className="records-table">
-              <thead>
-                <tr>
-                  <th>Patient Name</th>
-                  <th>Medical ID</th>
-                  <th>Disease</th>
-                  <th>Blood Group</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {patientBioMedList.slice(0, 3).map((record, index) => (
-                  <tr key={index}>
-                    <td>{record.name}</td>
-                    <td>
-                      <span className="medical-id">{record.medReportId}</span>
-                    </td>
-                    <td>{record.diseaseName}</td>
-                    <td>{record.bloodGroup}</td>
-                    <td>
-                      <Button 
-                        className="view-btn"
-                        size="small"
-                        startIcon={<VisibilityIcon style={{fontSize: '1rem'}} />}
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <table className="records-table">
+  <thead>
+    <tr>
+      <th>Patient Name</th>
+      <th>Phone</th>
+      <th>Address</th>
+      <th>Weight</th>
+      <th>Height</th>
+      <th>Blood Group</th>
+      <th>Disease</th>
+      <th>Disease Description</th>
+      <th>Disease Started On</th>
+    </tr>
+  </thead>
+  <tbody>
+    {patientBioMedList.map((record, index) => (
+      <tr key={index}>
+        <td>{record.name}</td>
+        <td>{record.phoneNumber}</td>
+        <td>{record._address}</td>
+        <td>{record.weight}</td>
+        <td>{record.height}</td>
+        <td>{record.bloodGroup}</td>
+        <td>{record.diseaseName}</td>
+        <td>{record.diseaseDescription}</td>
+        <td>{record.diseaseStartedOn}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
           </div>
         </div>
       )}

@@ -1,12 +1,9 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeFirestore, persistentLocalCache } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBkngcxSYn3rK1_IVUNdqTSiP2BeFICLV8",
   authDomain: "miniproject-72df9.firebaseapp.com",
@@ -20,6 +17,13 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const auth = getAuth(app); // Make sure this line is included
+const auth = getAuth(app);
 
-export { auth }; // Export auth properly
+// ✅ Force Firestore to use long polling (avoid QUIC/WebChannel issues)
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  useFetchStreams: false, // optional but improves compatibility
+  localCache: persistentLocalCache(),
+});
+
+export { auth, db };

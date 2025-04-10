@@ -8,10 +8,17 @@ const sendToServerForSecondEncryption = {
         return secondCipherText
     },
     decryptSecondCipherText: (secondCipherText, sender, medicalReportId) => {
-        let hash = localStorage.getItem(sender + medicalReportId)
-        let firstCipherText = CryptoJS.AES.decrypt(secondCipherText, hash).toString(CryptoJS.enc.Utf8);
-        return firstCipherText
-    }
+        console.log("Decrypting second ciphertext:", secondCipherText, sender, medicalReportId);
+        try {
+            let hash = localStorage.getItem(sender + medicalReportId)
+            let firstCipherText = CryptoJS.AES.decrypt(secondCipherText, hash).toString(CryptoJS.enc.Utf8);
+            return firstCipherText
+        } catch (e) {
+          console.error("Second decryption failed:", e);
+          return null;
+        }
+      }
+      
 }
 
 export default sendToServerForSecondEncryption

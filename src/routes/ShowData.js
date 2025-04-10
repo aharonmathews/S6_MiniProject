@@ -3,42 +3,75 @@ import Web3 from "web3";
 import CryptoJS from "crypto-js";
 import sendToServerForSecondEncryption from "../server/sendToServerForSecondEncryption";
 import { SAVE_DATA_LIST_ADDRESS, SAVE_DATA_LIST_ABI } from "../contracts/SaveData";
-import "./ShowData.css"; // Import the new CSS file
+import "./ShowData.css";
 
 function ShowData() {
   const [patientBioMedList, setPatientBioMedList] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
-      const saveDataContract = new web3.eth.Contract(SAVE_DATA_LIST_ABI, SAVE_DATA_LIST_ADDRESS);
+      try {
+        const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
+        const saveDataContract = new web3.eth.Contract(SAVE_DATA_LIST_ABI, SAVE_DATA_LIST_ADDRESS);
 
-      let patientBioMedList = [];
-      const totalMedicalReports = await saveDataContract.methods.totalMedicalReports().call();
+        const totalMedicalReports = await saveDataContract.methods.totalMedicalReports().call();
+        console.log("Total reports:", totalMedicalReports);
 
-      for (let i = 0; i < totalMedicalReports; ++i) {
-        const {
-          hashOfOriginalDataString,
-          secondTimeEncryptedString,
-          sender,
-          medReportId,
-        } = await saveDataContract.methods.data(i).call();
+        const dataList = [];
 
-        let firstCiphertext = sendToServerForSecondEncryption.decryptSecondCipherText(
-          secondTimeEncryptedString,
-          sender,
-          medReportId
-        );
+        for (let i = 0; i < totalMedicalReports; i++) {
+          try {
+            const {
+              hashOfOriginalDataString,
+              secondTimeEncryptedString,
+              sender,
+              medReportId,
+            } = await saveDataContract.methods.data(i).call();
 
-        let originalDataObject = JSON.parse(
-          CryptoJS.AES.decrypt(firstCiphertext, hashOfOriginalDataString).toString(CryptoJS.enc.Utf8)
-        );
+            // Step 1: Decrypt the second ciphertext to get the first ciphertext
+            const firstCiphertext = sendToServerForSecondEncryption.decryptSecondCipherText(
+              secondTimeEncryptedString,
+              sender,
+              medReportId
+            );
 
-        let rowData = { ...originalDataObject.patientBio, ...originalDataObject.patientMedicalData };
-        patientBioMedList.push(rowData);
+            if (!firstCiphertext) {
+              console.warn(`Skipping record ${i}: firstCiphertext is empty.`);
+              continue;
+            }
+
+            // Step 2: Decrypt the first ciphertext using the hash
+            const decrypted = CryptoJS.AES.decrypt(firstCiphertext, hashOfOriginalDataString).toString(CryptoJS.enc.Utf8);
+
+            if (!decrypted) {
+              console.warn(`Skipping record ${i}: failed to decrypt firstCiphertext.`);
+              continue;
+            }
+
+            // Step 3: Parse decrypted JSON
+            let originalDataObject;
+            try {
+              originalDataObject = JSON.parse(decrypted);
+            } catch (err) {
+              console.error(`JSON parse error at record ${i}:`, err);
+              continue;
+            }
+
+            const rowData = {
+              ...originalDataObject.patientBio,
+              ...originalDataObject.patientMedicalData,
+            };
+
+            dataList.push(rowData);
+          } catch (err) {
+            console.error(`Error processing record ${i}:`, err);
+          }
+        }
+
+        setPatientBioMedList(dataList);
+      } catch (err) {
+        console.error("General fetch error:", err);
       }
-
-      setPatientBioMedList(patientBioMedList);
     };
 
     fetchData();
